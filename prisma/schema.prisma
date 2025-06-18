@@ -1,6 +1,6 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
+  output   = "../node_modules/.prisma/client"
 }
 
 datasource db {
@@ -8,17 +8,67 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id          String    @id @default(uuid())
+  email       String    @unique
+  password    String
+  name        String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  profiles    Profile[]
+  watchlist   Movie[]   @relation("Watchlist")
+  planId      String?   // Campo para la relación (opcional si no todos tienen plan)
+  plan        Plan?     @relation("UserPlan", fields: [planId], references: [id]) // Relación a la inversa con Users
+}
+
+model Profile {
+  id          String   @id @default(uuid())
+  name        String
+  avatar      String?  // URL de imagen
+  isChild     Boolean  @default(false)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  watched     Movie[]  @relation("WatchedMovies") // Películas vistas
+}
+
+model Movie {
+  id          String     @id @default(uuid())
+  title       String
+  description String?
+  duration    Int        // En minutos
+  releaseYear Int
+  genre       String     // Ej: "Action", "Comedy"
+  coverUrl    String     // URL del poster
+  videoUrl    String     // URL del video (o usar otro servicio como S3)
+  addedAt     DateTime   @default(now())
+  watchlist   User[]     @relation("Watchlist") // Usuarios que la añadieron
+  watchedBy   Profile[]  @relation("WatchedMovies") // Perfiles que la vieron
+}
+
+model Plan {
+  id          String    @id @default(uuid())
+  name        String    @unique
+  price       Float
+  resolution  String    // Ej: "HD", "4K"
+  users       User[]    @relation("UserPlan") // Relación con User
+}
+
+
 model first_table {
   id_first_table Int            @id(map: "first_table_pk") @default(autoincrement())
   name_char      String         @default("Nombre no proporcionado") @db.VarChar
   second_table   second_table[]
+
+  @@ignore
 }
+
 
 model second_table {
   id_second_table                            Int          @id(map: "second_table_pk") @default(autoincrement())
   story_char                                 String?      @db.VarChar
   colum_creada_para_el_fk_con_first_table_fk Int?
   first_table                                first_table? @relation(fields: [colum_creada_para_el_fk_con_first_table_fk], references: [id_first_table], onDelete: NoAction, onUpdate: NoAction, map: "second_table_first_table_fk")
+  @@ignore
 }
 
 /// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
