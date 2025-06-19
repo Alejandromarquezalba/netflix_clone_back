@@ -1,15 +1,4 @@
-import { 
-    IsString, 
-    IsNumber, 
-    IsBoolean, 
-    IsOptional,
-    IsEnum,
-    Min,
-    Max,
-    MaxLength,
-    MinLength,
-    IsInt
-    } from 'class-validator';
+import { IsString, IsNumber, IsBoolean, IsOptional, IsEnum, Min, Max, MaxLength, MinLength, IsInt } from 'class-validator';
     
     export enum PlanType {
         BASIC = 'BASIC',

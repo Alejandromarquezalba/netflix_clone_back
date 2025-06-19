@@ -26,9 +26,10 @@ model Profile {
   name        String
   avatar      String?  // URL de imagen
   isChild     Boolean  @default(false)
+  pin         String?  // Campo nuevo: PIN opcional (se almacenará hasheado)
   userId      String
   user        User     @relation(fields: [userId], references: [id])
-  watched     Movie[]  @relation("WatchedMovies") // Películas vistas
+  watched     Movie[]  @relation("WatchedMovies")
 }
 
 model Movie {

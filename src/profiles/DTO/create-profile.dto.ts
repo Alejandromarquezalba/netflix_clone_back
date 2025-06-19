@@ -1,15 +1,4 @@
-import { 
-    IsString, 
-    IsOptional, 
-    IsBoolean,
-    IsEnum,
-    IsInt,
-    MaxLength,
-    MinLength,
-    Min,
-    Max,
-    IsUrl
-    } from 'class-validator';
+import { IsString, IsOptional, IsBoolean, IsEnum, IsInt, MaxLength, MinLength, Min, Max, IsUrl } from 'class-validator';
     
     export enum ProfileType {
         ADULT = 'ADULT',
@@ -59,5 +48,5 @@ import {
     
         @IsInt({ message: 'El ID del usuario debe ser un entero' })
         @Min(1, { message: 'El ID del usuario debe ser válido' })
-        userId: number;
+        userId: string;
     }
