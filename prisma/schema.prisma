@@ -8,6 +8,10 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum UserRole {
+  USER
+  ADMIN
+}
 model User {
   id          String    @id @default(uuid())
   email       String    @unique
@@ -19,6 +23,7 @@ model User {
   watchlist   Movie[]   @relation("Watchlist")
   planId      String?   // Campo para la relación (opcional si no todos tienen plan)
   plan        Plan?     @relation("UserPlan", fields: [planId], references: [id]) // Relación a la inversa con Users
+  role        UserRole  @default(USER)
 }
 
 model Profile {
