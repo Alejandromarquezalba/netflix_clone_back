@@ -10,7 +10,7 @@ export class UserService {
     constructor(private prisma: PrismaService) {}
 
     async create(createUserDto: CreateUserDto) {
-        // Hashear la contraseña antes de crear el usuario
+        //hasheo de la contraseña con bctyp
         const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
     
         return this.prisma.user.create({
@@ -18,7 +18,7 @@ export class UserService {
                 email: createUserDto.email,
                 name: createUserDto.name,
                 password: hashedPassword,
-                role: createUserDto.role || UserRole.USER, // Valor por defecto aquí
+                role: createUserDto.role || UserRole.USER, // <---- VALOR POR DEFECTO del rol acá, el cual va a ser USER ponele
             }
         });
     }

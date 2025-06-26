@@ -14,14 +14,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if (!secret) {
         throw new InternalServerErrorException('JWT_SECRET environment variable is not defined.');
         }
-
         super({
         jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
         ignoreExpiration: false,
-        secretOrKey: secret, 
+        secretOrKey: secret, // Usa la variable 'secret' que ya validamos
         });
     }
-
 
     async validate(payload: any) {
 
@@ -29,7 +27,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         if (!user) {
         throw new UnauthorizedException(); 
         }
-
 
         return { userId: user.id, email: user.email, roles: user.role }; 
     }

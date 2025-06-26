@@ -38,4 +38,7 @@ export class VideoMetadataDto {
 
     @ValidateNested()
     videoMetadata: VideoMetadataDto;
+
+    coverUrl: string = '/default-cover.jpg'; //miniatua de peli
+    duration: number = 90; //tiempo cuando dura en min
 }
