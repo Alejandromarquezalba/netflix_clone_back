@@ -2,11 +2,13 @@
 import { Controller, Get, Post, Body, Param, Delete, Patch, UseGuards  } from '@nestjs/common';
 import { MovieService } from './movies.service';
 import { CreateMovieDto } from './DTO/create-movie.dto';
-import { Roles } from '../auth/decorators/roles.decorator'; // Importa tu decorador Roles
-import { UserRole } from '@prisma/client';
-import { RolesGuard } from 'src/auth/guards/roles.guard';
+
 import { UpdateMovieDto } from './DTO/update-movie.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+//seguridad
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { UserRole } from '@prisma/client';
+import { Roles } from 'src/auth/decorators/roles.decorator';
 
 @Controller('movies')
 export class MovieController {
@@ -30,11 +32,15 @@ export class MovieController {
     }
 
     @Patch(':id')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(UserRole.ADMIN) 
     update(@Param('id') id: string, @Body() updateMovieDto: UpdateMovieDto) {
         return this.movieService.update(id, updateMovieDto);
     }
 
     @Delete(':id')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(UserRole.ADMIN) 
     remove(@Param('id') id: string) {
         return this.movieService.remove(id);
     }

@@ -1,8 +1,12 @@
-import { Controller, Get, Post, Body, Param, Delete, Patch } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Patch, UseGuards } from '@nestjs/common';
 import { ProfileService } from './profiles.service';
-
 import { CreateProfileDto } from './DTO/create-profile.dto';
 import { UpdateProfileDto } from './DTO/update-profile.dto';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+//seguridad
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { UserRole } from '@prisma/client';
+import { Roles } from 'src/auth/decorators/roles.decorator';
 
 @Controller('profile') // @Controller('movies')
 export class ProfileController {
@@ -24,6 +28,8 @@ export class ProfileController {
     }
 
     @Patch(':id')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(UserRole.ADMIN) 
     update(@Param('id') id: string, @Body() updateProfileDto: UpdateProfileDto) {
         return this.profileService.update(id, updateProfileDto);
     }

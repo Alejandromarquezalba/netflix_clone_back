@@ -1,33 +1,46 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { UserService } from '../users/users.service';
+import { UserService } from 'src/users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs'; 
 import { CreateUserDto } from '../users/DTO/create-user.dto';
 import { ConflictException } from '@nestjs/common/exceptions/conflict.exception';
-
-
+import { UserRole } from '@prisma/client'; // Asegúrate de que UserRole esté importado correctamente
+import { PrismaService } from 'src/prisma/prisma.service'; // Asegúrate de que PrismaService esté importado y configurado correctamente
 @Injectable()
 export class AuthService {
     constructor(
         private usersService: UserService,
         private jwtService: JwtService,
+        private prisma: PrismaService, // Asegúrate de que PrismaService esté importado y configurado correctamente
     ) {}
 
     async register(createUserDto: CreateUserDto) {
+        // 1. Verificar si el usuario ya existe por email
         const existingUser = await this.usersService.findByEmail(createUserDto.email);
         if (existingUser) {
             throw new ConflictException('Este usuario con este email ya existe');
+        }
+
+        // 2. Construir el objeto de datos del usuario, FORZANDO el rol a 'USER'
+
+        const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+    
+        const newUser = await this.prisma.user.create({
+            data: {
+                email: createUserDto.email,
+                name: createUserDto.name,
+                password: hashedPassword,
+                role: UserRole.USER, // Rol FIJO aquí
             }
-        
-            const newUser = await this.usersService.create(createUserDto);
-            
-            const payload = { 
+        });
+
+        const payload = { 
             email: newUser.email, 
             sub: newUser.id, 
             role: newUser.role 
-            };
-            
-            return {
+        };
+
+        return {
             user: {
                 id: newUser.id,
                 email: newUser.email,
@@ -35,8 +48,9 @@ export class AuthService {
                 role: newUser.role
             },
             access_token: this.jwtService.sign(payload)
-            };
-        }
+        };
+    }
+
 
     async validateUser(email: string, password: string) {
         const user = await this.usersService.findByEmail(email);

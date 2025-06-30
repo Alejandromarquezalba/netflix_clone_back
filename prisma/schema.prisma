@@ -9,8 +9,9 @@ datasource db {
 }
 
 enum UserRole {
-  USER
   ADMIN
+  MODERATOR
+  USER
 }
 model User {
   id          String    @id @default(uuid())

@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsBoolean, IsOptional, IsEnum, Min, Max, MaxLength, MinLength, IsInt
+import { IsString, IsNumber, IsBoolean, IsOptional, IsEnum, Min, Max, MaxLength, MinLength, IsInt, IsNotEmpty
     } from 'class-validator';
     
     export enum PlanType {
@@ -61,4 +61,9 @@ import { IsString, IsNumber, IsBoolean, IsOptional, IsEnum, Min, Max, MaxLength,
     
         @IsBoolean({ message: 'El estado activo debe ser verdadero o falso' })
         isActive: boolean = true;
+
+        @IsString() 
+        @IsNotEmpty()
+        resolution: string; 
+        
     }

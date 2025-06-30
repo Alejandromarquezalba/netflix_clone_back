@@ -17,7 +17,7 @@ export class CreateUserDto {
     @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/, {
         message: 'La contraseña debe tener al menos 1 mayúscula, 1 minúscula y 1 número.',
     })
-    password: string; // se recibe aca sin hashh
+    password: string; // se recibe aca sin
 
     @IsOptional()
     @IsEnum(UserRole)

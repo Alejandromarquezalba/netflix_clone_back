@@ -18,7 +18,7 @@ export class UserService {
                 email: createUserDto.email,
                 name: createUserDto.name,
                 password: hashedPassword,
-                role: createUserDto.role || UserRole.USER, // <---- VALOR POR DEFECTO del rol acá, el cual va a ser USER ponele
+                role: UserRole.USER, // <---- VALOR POR DEFECTO del rol acá, el cual va a ser USER ponele
             }
         });
     }

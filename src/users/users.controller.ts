@@ -7,7 +7,10 @@ import { CreateUserDto } from './DTO/create-user.dto';
 import { UpdateUserDto } from './DTO/update-user.dto';
 
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-
+//seguridad
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { UserRole } from '@prisma/client';
+import { Roles } from 'src/auth/decorators/roles.decorator';
 @Controller('user') //
 export class UserController {
     constructor(private readonly userService: UserService) {}
@@ -29,11 +32,15 @@ export class UserController {
     }
 
     @Patch(':id')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(UserRole.ADMIN) 
     update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
         return this.userService.update(id, updateUserDto);
     }
 
     @Delete(':id')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(UserRole.ADMIN) 
     remove(@Param('id') id: string) {
         return this.userService.remove(id);
     }
