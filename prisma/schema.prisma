@@ -22,42 +22,60 @@ model User {
   updatedAt   DateTime  @updatedAt
   profiles    Profile[]
   watchlist   Movie[]   @relation("Watchlist")
-  planId      String?   // Campo para la relación (opcional si no todos tienen plan)
-  plan        Plan?     @relation("UserPlan", fields: [planId], references: [id]) // Relación a la inversa con Users
+  planId      String?  
+  plan        Plan?     @relation("UserPlan", fields: [planId], references: [id]) //relación a la inversa con users
   role        UserRole  @default(USER)
 }
 
+enum ProfileTypeEnum {
+  ADULT
+  CHILD
+}
+
+enum AgeRatingEnum {
+  ALL
+  KIDS
+  TEEN
+  MATURE
+}
 model Profile {
-  id          String   @id @default(uuid())
-  name        String
-  avatar      String?  // URL de imagen
-  isChild     Boolean  @default(false)
-  pin         String?  // Campo nuevo: PIN opcional (se almacenará hasheado)
-  userId      String
-  user        User     @relation(fields: [userId], references: [id])
-  watched     Movie[]  @relation("WatchedMovies")
+  id                 String         @id @default(uuid())
+  name               String
+  avatarUrl          String?        
+  type               ProfileTypeEnum 
+  ageRestriction     AgeRatingEnum  
+  preferredLanguage  String?
+  autoPlay           Boolean        @default(true) 
+  hasPin             Boolean        @default(false) 
+  pin                String?        
+  userId             String
+  user               User           @relation(fields: [userId], references: [id])
+  watched            Movie[]        @relation("WatchedMovies")
+
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
 }
 
 model Movie {
   id          String     @id @default(uuid())
   title       String
   description String?
-  duration    Int        // En minutos
+  duration    Int        //minutos
   releaseYear Int
-  genre       String     // Ej: "Action", "Comedy"
-  coverUrl    String     // URL del poster
-  videoUrl    String     // URL del video (o usar otro servicio como S3)
+  genre       String     //genero de pelicula
+  coverUrl    String     //url del poster
+  videoUrl    String     //url del video (o usar otro servicio como S3)
   addedAt     DateTime   @default(now())
-  watchlist   User[]     @relation("Watchlist") // Usuarios que la añadieron
-  watchedBy   Profile[]  @relation("WatchedMovies") // Perfiles que la vieron
+  watchlist   User[]     @relation("Watchlist") //usuarios que la añadieron asu lista
+  watchedBy   Profile[]  @relation("WatchedMovies") //perfiles que la vieron
 }
 
 model Plan {
   id          String    @id @default(uuid())
   name        String    @unique
   price       Float
-  resolution  String    // Ej: "HD", "4K"
-  users       User[]    @relation("UserPlan") // Relación con User
+  resolution  String    //resoluocn si HD o 4k
+  users       User[]    @relation("UserPlan") //rregreso, relación con User
 }
 
 

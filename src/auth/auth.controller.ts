@@ -16,8 +16,8 @@ export class AuthController {
 
     @Post('register')
     async register(@Body() createUserDto: CreateUserDto) {
-        const user = await this.usersService.create(createUserDto);
-        return { message: 'Usuario registrado exitosamente', user: { id: user.id, email: user.email } };
+        const { user, access_token } = await this.authService.register(createUserDto); 
+        return { message: 'Usuario registrado exitosamente', user: { id: user.id, email: user.email }, access_token };
     }
 
 

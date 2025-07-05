@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsBoolean, IsEnum, IsInt, MaxLength, MinLength, Min, Max, IsUrl } from 'class-validator';
+import { IsString, IsOptional, IsBoolean, IsEnum, IsInt, MaxLength, MinLength, Min, Max, IsUrl, IsUUID } from 'class-validator';
     
     export enum ProfileType {
         ADULT = 'ADULT',
@@ -46,7 +46,8 @@ import { IsString, IsOptional, IsBoolean, IsEnum, IsInt, MaxLength, MinLength, M
         @MaxLength(6, { message: 'El PIN no puede exceder los 6 caracteres' })
         pin?: string;
     
-        @IsInt({ message: 'El ID del usuario debe ser un entero' })
-        @Min(1, { message: 'El ID del usuario debe ser válido' })
+        /*
+        @IsUUID('4', { message: 'El ID del usuario debe ser un UUID válido' }) // uuid reemplaza al isINT y Min si usas los uuid para los id mas seguros y largos
         userId: string;
+        */
     }
