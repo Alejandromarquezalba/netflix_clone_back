@@ -15,6 +15,9 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { UserRole } from '@prisma/client';
 import { Roles } from 'src/auth/decorators/roles.decorator';
+
+import { ChangePasswordDto } from './DTO/change-pasword.dto';
+
 @Controller('user') //
 export class UserController {
     constructor(private readonly userService: UserService) {}
@@ -69,5 +72,18 @@ export class UserController {
     @Roles(UserRole.ADMIN) 
     remove(@Param('id') id: string) {
         return this.userService.remove(id);
+    }
+
+    @Patch(':id/change-password')
+    @UseGuards(JwtAuthGuard)
+    async changePassword(
+        @Param('id') id: string,
+        @Body() changePasswordDto: ChangePasswordDto,
+        @GetUser() currentUser: User,
+    ) {
+        if (currentUser.id !== id) {
+            throw new ForbiddenException('No puedes cambiar la contraseña de otro usuario');
+        }
+        return this.userService.changePassword(id, changePasswordDto);
     }
 }

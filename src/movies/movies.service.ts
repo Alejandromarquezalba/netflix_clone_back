@@ -23,8 +23,8 @@ export class MovieService {
                 releaseYear: createMovieDto.releaseYear,
                 genre: this.formatGenres(createMovieDto.genres), // <-- metodo de formatear está acá
                 videoUrl: createMovieDto.videoMetadata.videoUrl,
-                coverUrl: createMovieDto.coverUrl,  
-                duration: createMovieDto.duration,                     
+                coverUrl: createMovieDto.coverUrl || '/default-cover.jpg',
+                duration: createMovieDto.duration || 90,                    
             },
             });
         }
