@@ -47,7 +47,25 @@ export class ProfileService {
     }
 
     async findOne(id: string) {
-        return this.prisma.profile.findUnique({ where: { id } });
+        return this.prisma.profile.findUnique({
+            where: { id },
+            select: {  
+                id: true,
+                name: true,
+                userId: true, 
+                type: true,
+                ageRestriction: true, 
+            }
+        });
+    }
+
+    async findByUserId(userId: string) {
+        return this.prisma.profile.findMany({
+            where: { userId },
+            select: {
+                id: true, name: true, userId: true, type: true, ageRestriction: true,
+            }
+        });
     }
 
     async update(id: string, updateProfileDto: UpdateProfileDto) {

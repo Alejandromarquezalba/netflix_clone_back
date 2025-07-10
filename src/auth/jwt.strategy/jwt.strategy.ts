@@ -4,7 +4,8 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { UserService } from 'src/users/users.service';
 import { InternalServerErrorException } from '@nestjs/common/exceptions/internal-server-error.exception';
-import { UserRole } from '@prisma/client'; // Asegúrate de que UserRole esté importado correctamente
+import { UserRole } from '@prisma/client';
+import { Request } from 'express'; 
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -16,9 +17,17 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         throw new InternalServerErrorException('JWT_SECRET environment variable is not defined.');
         }
         super({
-        jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+        jwtFromRequest: ExtractJwt.fromExtractors([(req: Request) => {
+            let token = null;
+            if (req && req.cookies) {
+                token = req.cookies['token']; //'token'es el nombre de la cookie
+            }
+            return token;
+        }]),
         ignoreExpiration: false,
-        secretOrKey: secret, // Usa la variable 'secret' que ya validamos
+        secretOrKey: secret,
+        
+
         });
     }
 

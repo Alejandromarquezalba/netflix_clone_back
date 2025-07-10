@@ -3,6 +3,9 @@ import { ProfileService } from './profiles.service';
 import { CreateProfileDto } from './DTO/create-profile.dto';
 import { UpdateProfileDto } from './DTO/update-profile.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { ForbiddenException } from '@nestjs/common/exceptions';
+import { NotFoundException } from '@nestjs/common/exceptions/not-found.exception';
+
 //seguridad
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { UserRole } from '@prisma/client';
@@ -22,15 +25,46 @@ export class ProfileController {
         return this.profileService.create(createProfileDto, authenticatedUserId);
     }
 
-    @Get()
-    findAll() {
-        return this.profileService.findAll();
+    @Get() 
+    async getMyProfiles( 
+    @Req() req: Request & { user: { id: string; role: UserRole } }
+    ) {
+        return this.profileService.findByUserId(req.user.id);
+    }
+    
+    @Get(':id')
+    async findOne(
+        @Param('id') id: string,
+        @Req() req: Request & { user: { id: string, role: UserRole } }
+    ) {
+        const profile = await this.profileService.findOne(id);
+        //verificamo si existe
+            if (!profile) {
+                throw new NotFoundException('Perfil no encontrado');
+            }
+            //vrifica la titularidad el usuario o si es dueño del recuerdo al que quiere acceder
+            if (req.user.role !== UserRole.ADMIN && profile.userId !== req.user.id) {
+                throw new ForbiddenException('No tienes permiso para ver este perfil');
+            }
+        return profile;
     }
 
-    @Get(':id')
-    findOne(@Param('id') id: string) {
-        return this.profileService.findOne(id);
+    @Get('admin/profiles') 
+    @UseGuards(RolesGuard)
+    @Roles(UserRole.ADMIN)
+    findAllAdmin() { 
+        return this.profileService.findAll(); 
     }
+
+
+    @Get('admin/profiles/:userId') //profile/admin/profiles/:userId
+    @UseGuards(RolesGuard)
+    @Roles(UserRole.ADMIN)
+    findProfilesByUserIdAdmin(@Param('userId') userId: string) {
+        return this.profileService.findByUserId(userId); // Este 'userId' es el ID del USUARIO
+    }
+
+    
 
     @Patch(':id')
     @UseGuards(JwtAuthGuard, RolesGuard)
@@ -47,3 +81,24 @@ export class ProfileController {
     return this.profileService.remove(id, authenticatedUserId); 
     }
 }
+
+//CAMBIO DE GEMINI
+/*
+esto era de DEEP
+@Get()
+    @UseGuards(JwtAuthGuard, RolesGuard) 
+    @Roles(UserRole.ADMIN)
+    findAll() {
+        return this.profileService.findAll();
+    }
+fue cambiado por: 
+
+@Get() 
+    async getMyProfiles( 
+    @Req() req: Request & { user: { id: string; role: UserRole } }
+    ) {
+        return this.profileService.findByUserId(req.user.id);
+    }
+
+
+*/

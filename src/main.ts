@@ -1,13 +1,16 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
+import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  app.use(cookieParser());
+
   app.enableCors({
-    origin: 'http://tufrontend.com', // Reemplaza con tu URL frontend
-    credentials: true, // Permite cookies
+    origin: 'http://tufrontend.com', 
+    credentials: true,
   });
 
   app.useGlobalPipes(
