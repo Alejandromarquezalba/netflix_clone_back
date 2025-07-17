@@ -7,7 +7,7 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-
+//*Usuario
 enum UserRole {
   ADMIN
   MODERATOR
@@ -27,6 +27,7 @@ model User {
   role        UserRole  @default(USER)
 }
 
+//*Profile
 enum ProfileTypeEnum {
   ADULT
   CHILD
@@ -55,28 +56,63 @@ model Profile {
   createdAt          DateTime       @default(now())
   updatedAt          DateTime       @updatedAt
 }
+//*MOvie
+enum MovieGenre {
+  ACTION
+  COMEDY
+  DOCUMENTARY
 
+}
 model Movie {
   id          String     @id @default(uuid())
   title       String
   description String?
-  duration    Int        //minutos
+  duration    Int?        //minutos
   releaseYear Int
-  genre       String     //genero de pelicula
+  genres      MovieGenre[]
+  videoMetadata   Json    @default("{}")
   coverUrl    String     //url del poster
-  videoUrl    String     //url del video (o usar otro servicio como S3)
+
   addedAt     DateTime   @default(now())
   watchlist   User[]     @relation("Watchlist") //usuarios que la añadieron asu lista
   watchedBy   Profile[]  @relation("WatchedMovies") //perfiles que la vieron
 }
-
-model Plan {
-  id          String    @id @default(uuid())
-  name        String    @unique
-  price       Float
-  resolution  String    //resoluocn si HD o 4k
-  users       User[]    @relation("UserPlan") //rregreso, relación con User
+//*PLan
+enum PlanType {
+  BASIC
+  STANDARD
+  PREMIUM
+  FAMILY
 }
+
+enum VideoQuality {
+  SD
+  HD
+  FHD
+  UHD
+}
+model Plan {
+  id             String       @id @default(uuid())
+  name           String       @unique
+  description    String?      
+  price          Float
+  type           PlanType     
+  maxScreens     Int
+  maxProfiles    Int
+  maxVideoQuality VideoQuality 
+  allowDownloads Boolean
+  hasAds         Boolean
+  freeTrialDays  Int?         @default(0) 
+  isActive       Boolean      @default(true) 
+  resolution     String     
+
+  // relación con User (asumiendo que un usuario tiene un plan)
+  users          User[]       @relation("UserPlan")
+
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
 
 
 model first_table {
@@ -96,7 +132,7 @@ model second_table {
   @@ignore
 }
 
-/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+
 model tabla_exclusiva {
   una_columna_extra String? @db.VarChar
 

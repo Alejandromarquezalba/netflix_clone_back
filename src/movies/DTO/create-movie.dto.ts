@@ -1,12 +1,9 @@
 import { IsString, IsInt, IsUrl, IsArray, IsEnum, Min, Max, IsOptional, ValidateNested, MaxLength, MinLength} from 'class-validator';
 import { Type } from 'class-transformer';
+import { MovieGenre } from '@prisma/client';
 
 //Generos
-export enum MovieGenre {
-    ACTION = 'Action',
-    COMEDY = 'Comedy',
-    DOCUMENTARY = 'Documentary',
-}
+
 
 export class VideoMetadataDto {
     @IsUrl()
@@ -34,7 +31,7 @@ export class VideoMetadataDto {
     releaseYear: number;
 
     @IsArray()
-    @IsEnum(MovieGenre, { each: true })
+    @IsEnum(MovieGenre, { each: true, message: 'Cada genero debe ser valido.' })
     genres: MovieGenre[];
 
     @ValidateNested()
@@ -54,26 +51,26 @@ export class VideoMetadataDto {
 /*
 //ADMIN: creacuion
 {
-    "title": "nombre de peli",
-    "releaseYear": año,
-    "genres": ["Action", "Comedy"],
+    "title": "Titulo",
+    "releaseYear": 2025,
+    "genres": ["ACTION"], 
     "videoMetadata": {
-        "videoUrl": "https://etc.mp4",
+        "videoUrl": "https://url.minima.com/video.mp4"
     }
 }
 
 //creacion con mas datos
 {
-    "title": "nombre peli completa + datos",
-    "description": "descripcion de la hstoria",
+    "title": "Titulo completo",
+    "description": "Una emocionante historia sobre un desarrollador que descubre los secretos de la Matrix.",
     "releaseYear": 2024,
-    "genres": ["Action", "Comedy"],
+    "genres": ["ACTION", "COMEDY"], // <-- ¡Cambia aquí a géneros válidos!
     "videoMetadata": {
-        "videoUrl": "https://etc.mp4",
-        "trailerUrl": "https://etc-trailer.mp4",
+        "videoUrl": "https://miplataforma.com/videos/gran_aventura.mp4",
+        "trailerUrl": "https://miplataforma.com/trailers/gran_aventura_trailer.mp4"
     },
-    "coverUrl": "https://example.com/mi-portada-personalizada.jpg",
-    "duration": 100
+    "coverUrl": "https://miplataforma.com/covers/gran_aventura_cover.jpg",
+    "duration": 150
 }
 //La duracion 100 es en minutos
 */

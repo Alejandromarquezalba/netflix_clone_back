@@ -51,3 +51,13 @@ import { IsString, IsOptional, IsBoolean, IsEnum, IsInt, MaxLength, MinLength, M
         userId: string;
         */
     }
+
+/* 
+{
+    "name": "Mi Perfil Personal",
+    "type": "ADULT",
+    "ageRestriction": "MATURE",
+    "autoPlay": true,
+    "hasPin": false
+}
+*/

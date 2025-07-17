@@ -5,7 +5,7 @@ import { CreateProfileDto } from './DTO/create-profile.dto';
 import { ProfileTypeEnum, AgeRatingEnum } from '@prisma/client'; 
 import { ForbiddenException, BadRequestException } from '@nestjs/common';
 import { NotFoundException } from '@nestjs/common/exceptions/not-found.exception';
-
+import { UserRole } from '@prisma/client';
 @Injectable()
 export class ProfileService {
     private readonly MAX_PROFILES_PER_USER = 5; //5limite de perfiles x cada user
@@ -75,7 +75,7 @@ export class ProfileService {
         });
     }
 
-    async remove(id: string, authenticatedUserId: string) { //id del perfil y del usuario autenticado
+    async remove(id: string, authenticatedUserId: string, userRole: UserRole) { //id del perfil y del usuario autenticado
             //ver si existe primero el usuario 
             const profile = await this.prisma.profile.findUnique({
             where: { id },
@@ -86,12 +86,12 @@ export class ProfileService {
             }
         
             //seguridad
-            //verificar que el perfil sea del usuario, cordinando la autenticacion
-            if (profile.userId !== authenticatedUserId) { // <--- ¡Aquí está la magia!
-            throw new ForbiddenException('No tienes permiso para eliminar este perfil.');
+            //verifico que el perfil sea del usuario, cordinando la autenticacion
+            if (userRole !== UserRole.ADMIN && profile.userId !== authenticatedUserId) { 
+                throw new ForbiddenException('No tienes permiso para eliminar este perfil.');
             }
         
-            //si todo está ok entonces puede borrar
+            //si todo ok entonces se puede borrar
             await this.prisma.profile.delete({
             where: { id },
             });

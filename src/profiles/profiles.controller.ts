@@ -57,7 +57,7 @@ export class ProfileController {
     }
 
 
-    @Get('admin/profiles/:userId') //profile/admin/profiles/:userId
+    @Get('admin/profiles/:userId')
     @UseGuards(RolesGuard)
     @Roles(UserRole.ADMIN)
     findProfilesByUserIdAdmin(@Param('userId') userId: string) {
@@ -73,32 +73,16 @@ export class ProfileController {
         return this.profileService.update(id, updateProfileDto);
     }
 
-    @Delete(':id') // El ':id' en la URL le dice a NestJS que espere un ID en la ruta
-    async remove(@Param('id') id: string, @Req() req: Request) {
-    //extraer el id autenticado del TOKEN
-    const authenticatedUserId = req.user.id as string; 
-    //enviar los datos al servicio
-    return this.profileService.remove(id, authenticatedUserId); 
+    @Delete(':id') 
+    async remove(@Param('id') id: string, @Req() req: Request & { user: { id: string; role: UserRole } }
+    ) {
+        //extraer el id autenticado del TOKEN
+        const authenticatedUserId = req.user.id as string; 
+        const userRole = req.user.role; //saco el rol del usuario pa'ver
+
+        //pasa el ID del perfil, el ID del usuario autenticado Y su rol al servicio
+        return this.profileService.remove(id, authenticatedUserId, userRole); 
     }
+    
 }
 
-//CAMBIO DE GEMINI
-/*
-esto era de DEEP
-@Get()
-    @UseGuards(JwtAuthGuard, RolesGuard) 
-    @Roles(UserRole.ADMIN)
-    findAll() {
-        return this.profileService.findAll();
-    }
-fue cambiado por: 
-
-@Get() 
-    async getMyProfiles( 
-    @Req() req: Request & { user: { id: string; role: UserRole } }
-    ) {
-        return this.profileService.findByUserId(req.user.id);
-    }
-
-
-*/
