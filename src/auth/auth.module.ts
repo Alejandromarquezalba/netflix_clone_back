@@ -10,7 +10,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(), // Necesario para usar ConfigService
+    ConfigModule.forRoot(), 
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],

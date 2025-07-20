@@ -3,14 +3,17 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import cookieParser from 'cookie-parser';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
+import { ConfigService } from '@nestjs/config';
+
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const configService = app.get(ConfigService); //instalciacion del config
 
   app.use(cookieParser());
 
   app.enableCors({
-    origin: 'http://tufrontend.com', 
+    origin: configService.get<string>('FRONTEND_URL'), //conect con el front
     credentials: true,
   });
 
@@ -25,8 +28,10 @@ async function bootstrap() {
     }),
   );
 
-  //filtro global para manejar excepciones
-  app.useGlobalFilters(new AllExceptionsFilter());
+  const port = configService.get<number>('PORT') || 3000; //lee port o 3000 por defaul
+  await app.listen(port); //Nestjs escucha ese puerto
+
+
 
   await app.listen(process.env.PORT ?? 3000);
 }

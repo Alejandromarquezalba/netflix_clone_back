@@ -2,18 +2,20 @@ import {Catch, ArgumentsHost, HttpException, HttpStatus, ExceptionFilter} from '
 import { Request, Response } from 'express';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import axios from 'axios';
+import { ConfigService } from '@nestjs/config';
 
 
-
-@Catch() // Este decorador sin argumentos captura CUALQUIER excepción
+@Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
+    constructor(private configService: ConfigService) {}
         catch(exception: unknown, host: ArgumentsHost) {
         const ctx = host.switchToHttp();
         const response = ctx.getResponse<Response>();
         const request = ctx.getRequest<Request>();
     
+        const nodeEnv = this.configService.get<string>('NODE_ENV'); 
         let status = HttpStatus.INTERNAL_SERVER_ERROR;
-        let message: string | string[] = 'Error interno del servidor'; // Mensaje genérico
+        let message: string | string[] = 'Error interno del servidor'; //mensaje generico
     
 
         if (exception instanceof HttpException) {
@@ -44,8 +46,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
             message = `Error en la base de datos: ${exception.message.split('\n').pop()}`; //mensaje más limpio
             }
         }
+        
         //axios
-
         else if (axios.isAxiosError(exception)) {
         const axiosError = exception;
         status = axiosError.response?.status || HttpStatus.INTERNAL_SERVER_ERROR;
@@ -55,11 +57,21 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
         //manejo de Cualquier Otra Excepción Inesperada (errores no atrapados)
         else if (exception instanceof Error) {
-            // Para errores no HTTP, a menudo los manejamos como 500 y ocultamos detalles sensibles en producción
             status = HttpStatus.INTERNAL_SERVER_ERROR;
-            message = 'Ocurrió un error inesperado.';
-            // Opcional: Loggear el error original para depuración
-            console.error('Unhandled exception:', exception.stack); 
+
+            // Si no estamos en producción, incluimos el mensaje específico del error.
+            // En producción, solo un mensaje genérico para no exponer detalles internos.
+            message = (nodeEnv !== 'production' && exception.message)
+                ? `Ocurrió un error inesperado: ${exception.message}`
+                : 'Ocurrió un error inesperado.';
+
+            // Loggeamos el stack completo solo en desarrollo o entornos que no sean producción.
+            if (nodeEnv !== 'production') {
+                console.error('Unhandled exception stack:', exception.stack);
+            } else {
+                // En producción, loggeamos solo el mensaje para evitar logs excesivamente grandes o sensibles.
+                console.error('Unhandled exception (production):', exception.message);
+            }
         }
     
         // estructura de la Respuesta del Error
