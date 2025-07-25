@@ -15,13 +15,13 @@ export class AuthService {
     ) {}
 
     async register(createUserDto: CreateUserDto) {
-        // 1. Verificar si el usuario ya existe por email
+        // verificar si el usuario ya existe x email
         const existingUser = await this.usersService.findByEmail(createUserDto.email);
         if (existingUser) {
             throw new ConflictException('Este usuario con este email ya existe');
         }
 
-        // 2. Construir el objeto de datos del usuario, FORZANDO el rol a 'USER'
+        //construir el objeto de datos del usuario, FORZANDO el rol a 'USER'
 
         const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
     

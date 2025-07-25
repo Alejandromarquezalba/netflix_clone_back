@@ -31,8 +31,5 @@ async function bootstrap() {
   const port = configService.get<number>('PORT') || 3000; //lee port o 3000 por defaul
   await app.listen(port); //Nestjs escucha ese puerto
 
-
-
-  await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();

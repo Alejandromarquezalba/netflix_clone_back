@@ -39,7 +39,8 @@ export class AuthController {
         //Configuración segura de la cookie
         res.cookie('token', access_token, {
             httpOnly: true, // No accesible desde JS
-            secure: process.env.NODE_ENV === 'production', //solo HTTPS en producción
+            secure: process.env.NODE_ENV === 'production', //*solo HTTPS en producción, esta linea ya me sirve de forma ingeligente para dejar ''apagado'' el SECURE con FALSE para que se puedan hacer HTTP en desarrollo y para que se ''prenda'' con SECURE true para cuando sea produccion.
+            
             sameSite: 'strict', //protección contra CSRF
             maxAge: 3600000, // 1 hora de vida
             path: '/', //disponible en todas las rutas

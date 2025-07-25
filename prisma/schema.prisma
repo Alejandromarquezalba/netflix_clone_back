@@ -7,27 +7,100 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-//*Usuario
-enum UserRole {
-  ADMIN
-  MODERATOR
-  USER
-}
+
 model User {
-  id          String    @id @default(uuid())
-  email       String    @unique
-  password    String
-  name        String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  profiles    Profile[]
-  watchlist   Movie[]   @relation("Watchlist")
-  planId      String?  
-  plan        Plan?     @relation("UserPlan", fields: [planId], references: [id]) //relación a la inversa con users
-  role        UserRole  @default(USER)
+  id        String    @id @default(uuid())
+  email     String    @unique
+  password  String
+  name      String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  planId    String?
+  role      UserRole  @default(USER)
+  profiles  Profile[]
+  plan      Plan?     @relation("UserPlan", fields: [planId], references: [id])
+  watchlist Movie[]   @relation("Watchlist")
 }
 
-//*Profile
+model Profile {
+  id                String          @id @default(uuid())
+  name              String
+  userId            String
+  pin               String?
+  ageRestriction    AgeRatingEnum
+  autoPlay          Boolean         @default(true)
+  avatarUrl         String?
+  createdAt         DateTime        @default(now())
+  hasPin            Boolean         @default(false)
+  preferredLanguage String?
+  type              ProfileTypeEnum
+  updatedAt         DateTime        @updatedAt
+  user              User            @relation(fields: [userId], references: [id])
+  watched           Movie[]         @relation("WatchedMovies")
+}
+
+model Movie {
+  id            String       @id @default(uuid())
+  title         String
+  description   String?
+  duration      Int?
+  releaseYear   Int
+  coverUrl      String
+  addedAt       DateTime     @default(now())
+  genres        MovieGenre[]
+  videoMetadata Json         @default("{}")
+  watchedBy     Profile[]    @relation("WatchedMovies")
+  watchlist     User[]       @relation("Watchlist")
+}
+
+model Plan {
+  id              String       @id @default(uuid())
+  name            String       @unique
+  price           Float
+  resolution      String
+  allowDownloads  Boolean
+  createdAt       DateTime     @default(now())
+  description     String?
+  freeTrialDays   Int?         @default(0)
+  hasAds          Boolean
+  isActive        Boolean      @default(true)
+  maxProfiles     Int
+  maxScreens      Int
+  maxVideoQuality VideoQuality
+  type            PlanType
+  updatedAt       DateTime     @updatedAt
+  users           User[]       @relation("UserPlan")
+}
+
+model first_table {
+  id_first_table Int            @id(map: "first_table_pk") @default(autoincrement())
+  name_char      String         @default("Nombre no proporcionado") @db.VarChar
+  second_table   second_table[]
+
+  @@ignore
+}
+
+model second_table {
+  id_second_table                            Int          @id(map: "second_table_pk") @default(autoincrement())
+  story_char                                 String?      @db.VarChar
+  colum_creada_para_el_fk_con_first_table_fk Int?
+  first_table                                first_table? @relation(fields: [colum_creada_para_el_fk_con_first_table_fk], references: [id_first_table], onDelete: NoAction, onUpdate: NoAction, map: "second_table_first_table_fk")
+
+  @@ignore
+}
+
+model tabla_exclusiva {
+  una_columna_extra String? @db.VarChar
+
+  @@ignore
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  MODERATOR
+}
+
 enum ProfileTypeEnum {
   ADULT
   CHILD
@@ -39,45 +112,13 @@ enum AgeRatingEnum {
   TEEN
   MATURE
 }
-model Profile {
-  id                 String         @id @default(uuid())
-  name               String
-  avatarUrl          String?        
-  type               ProfileTypeEnum 
-  ageRestriction     AgeRatingEnum  
-  preferredLanguage  String?
-  autoPlay           Boolean        @default(true) 
-  hasPin             Boolean        @default(false) 
-  pin                String?        
-  userId             String
-  user               User           @relation(fields: [userId], references: [id])
-  watched            Movie[]        @relation("WatchedMovies")
 
-  createdAt          DateTime       @default(now())
-  updatedAt          DateTime       @updatedAt
-}
-//*MOvie
 enum MovieGenre {
   ACTION
   COMEDY
   DOCUMENTARY
-
 }
-model Movie {
-  id          String     @id @default(uuid())
-  title       String
-  description String?
-  duration    Int?        //minutos
-  releaseYear Int
-  genres      MovieGenre[]
-  videoMetadata   Json    @default("{}")
-  coverUrl    String     //url del poster
 
-  addedAt     DateTime   @default(now())
-  watchlist   User[]     @relation("Watchlist") //usuarios que la añadieron asu lista
-  watchedBy   Profile[]  @relation("WatchedMovies") //perfiles que la vieron
-}
-//*PLan
 enum PlanType {
   BASIC
   STANDARD
@@ -90,51 +131,4 @@ enum VideoQuality {
   HD
   FHD
   UHD
-}
-model Plan {
-  id             String       @id @default(uuid())
-  name           String       @unique
-  description    String?      
-  price          Float
-  type           PlanType     
-  maxScreens     Int
-  maxProfiles    Int
-  maxVideoQuality VideoQuality 
-  allowDownloads Boolean
-  hasAds         Boolean
-  freeTrialDays  Int?         @default(0) 
-  isActive       Boolean      @default(true) 
-  resolution     String     
-
-  // relación con User (asumiendo que un usuario tiene un plan)
-  users          User[]       @relation("UserPlan")
-
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-}
-
-
-
-model first_table {
-  id_first_table Int            @id(map: "first_table_pk") @default(autoincrement())
-  name_char      String         @default("Nombre no proporcionado") @db.VarChar
-  second_table   second_table[]
-
-  @@ignore
-}
-
-
-model second_table {
-  id_second_table                            Int          @id(map: "second_table_pk") @default(autoincrement())
-  story_char                                 String?      @db.VarChar
-  colum_creada_para_el_fk_con_first_table_fk Int?
-  first_table                                first_table? @relation(fields: [colum_creada_para_el_fk_con_first_table_fk], references: [id_first_table], onDelete: NoAction, onUpdate: NoAction, map: "second_table_first_table_fk")
-  @@ignore
-}
-
-
-model tabla_exclusiva {
-  una_columna_extra String? @db.VarChar
-
-  @@ignore
 }
