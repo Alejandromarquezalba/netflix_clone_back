@@ -17,13 +17,25 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         throw new InternalServerErrorException('JWT_SECRET environment variable is not defined.');
         }
         super({
-        jwtFromRequest: ExtractJwt.fromExtractors([(req: Request) => {
-            let token = null;
-            if (req && req.cookies) {
-                token = req.cookies['token']; //'token'es el nombre de la cookie
-            }
-            return token;
-        }]),
+            jwtFromRequest: ExtractJwt.fromExtractors([
+                (req: Request) => {
+                  //1-Buscar primero en primero en Headers (NextAuth)
+                    const authHeader = req.headers.authorization;
+                    if (authHeader && authHeader.startsWith('Bearer ')) {
+                        console.log('✅ Token encontrado en headers');
+                        return authHeader.substring(7); // Extrae "Bearer "
+                    }
+                
+                    //2-Luego busca en cookies (otras peticiones)
+                    if (req?.cookies?.['token']) {
+                        console.log('✅ Token encontrado en cookies');
+                        return req.cookies['token'];
+                    }
+                
+                    console.log('❌ Token no encontrado en headers ni cookies');
+                    return null;
+                    }
+                ]),
         ignoreExpiration: false,
         secretOrKey: secret,
         

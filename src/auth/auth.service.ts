@@ -57,28 +57,30 @@ export class AuthService {
         
         if (!user) {
             throw new UnauthorizedException('Credenciales inválidas');
-        }
-
-        const isPasswordValid = await bcrypt.compare(password, user.password);
-        if (!isPasswordValid) {
+            }
+        
+            const isPasswordValid = await bcrypt.compare(password, user.password);
+            if (!isPasswordValid) {
             throw new UnauthorizedException('Credenciales inválidas');
-        }
-
-        const payload = { 
+            }
+        
+            const payload = { 
             email: user.email, 
             sub: user.id, 
-            role: user.role 
-        };
-
-        return {
+            role: user.role // ← Ahora user.role existe
+            };
+        
+            return {
             access_token: this.jwtService.sign(payload),
             user: {          
                 id: user.id,   
                 name: user.name,
-                email: user.email
-                }
+                email: user.email,
+                role: user.role // ← ¡Y aquí también!
+            }
             };
+        }
 
 
-    }
+    
 }

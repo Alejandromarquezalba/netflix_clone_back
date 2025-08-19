@@ -48,9 +48,19 @@ export class UserService {
     }
 
     async findByEmail(email: string) {
-        const user = await this.prisma.user.findUnique({ where: { email } });
-        return user;
-    }
+            const user = await this.prisma.user.findUnique({
+            where: { email },
+            select: {
+                id: true,
+                email: true,
+                name: true,
+                password: true,
+                role: true 
+            }
+            });
+            
+            return user;
+        }
 
     async changePassword(userId: string, changePasswordDto: ChangePasswordDto) {
         //busca al usuario en la base d
