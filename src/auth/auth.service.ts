@@ -39,16 +39,16 @@ export class AuthService {
             sub: newUser.id, 
             role: newUser.role 
         };
-
         return {
-            user: {
-                id: newUser.id,
-                email: newUser.email,
+            access_token: this.jwtService.sign(payload),
+            user: {                 //datos pal front
+                id: newUser.id, 
                 name: newUser.name,
-                role: newUser.role
-            },
-            access_token: this.jwtService.sign(payload)
-        };
+                email: newUser.email
+                }
+            };
+            
+        
     }
 
 
@@ -72,12 +72,13 @@ export class AuthService {
 
         return {
             access_token: this.jwtService.sign(payload),
-            user: {
-                id: user.id,
-                email: user.email,
+            user: {          
+                id: user.id,   
                 name: user.name,
-                role: user.role
-            }
-        };
+                email: user.email
+                }
+            };
+
+
     }
 }

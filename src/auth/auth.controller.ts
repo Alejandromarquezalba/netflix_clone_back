@@ -21,7 +21,7 @@ export class AuthController {
         const { user, access_token } = await this.authService.register(createUserDto); 
         return { 
             message: 'Usuario registrado exitosamente', 
-            user: { id: user.id, email: user.email } 
+            user: { email: user.email } 
         };
     }
 
@@ -46,7 +46,15 @@ export class AuthController {
             path: '/', //disponible en todas las rutas
         });
 
-        return { user }; //devuelve el usuario sin el token (ya está en la cookie)
+        return {
+            access_token, // ← ¡OBLIGATORIO para NextAuth!
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                role: user.role // ← Asegúrate de incluir esto
+            }
+          }; //devuelve el usuario sin el token (ya está en la cookie)
     }
 }
 

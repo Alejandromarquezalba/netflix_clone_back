@@ -5,6 +5,7 @@ import { UpdateProfileDto } from './DTO/update-profile.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { ForbiddenException } from '@nestjs/common/exceptions';
 import { NotFoundException } from '@nestjs/common/exceptions/not-found.exception';
+import { Query } from '@nestjs/common/decorators/http/route-params.decorator';
 
 //seguridad
 import { RolesGuard } from 'src/auth/guards/roles.guard';
@@ -25,10 +26,25 @@ export class ProfileController {
         return this.profileService.create(createProfileDto, authenticatedUserId);
     }
 
+    /* viejo get que se usaba antes de querer mostrar los perfiles de usuarios en el front.
     @Get() 
     async getMyProfiles( 
     @Req() req: Request & { user: { id: string; role: UserRole } }
     ) {
+        return this.profileService.findByUserId(req.user.id);
+    }
+    */
+
+    @Get()
+    async getMyProfiles(
+        @Req() req: Request & { user: { id: string; role: UserRole } },
+        @Query('userId') userId?: string  
+    ) {
+
+        if (userId && req.user.role === UserRole.ADMIN) {
+            return this.profileService.findByUserId(userId);
+        }
+
         return this.profileService.findByUserId(req.user.id);
     }
     
