@@ -83,8 +83,8 @@ export class ProfileController {
     
 
     @Patch(':id')
-    @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles(UserRole.ADMIN) 
+    @UseGuards(JwtAuthGuard)
+
     update(@Param('id') id: string, @Body() updateProfileDto: UpdateProfileDto) {
         return this.profileService.update(id, updateProfileDto);
     }
