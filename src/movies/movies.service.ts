@@ -34,12 +34,68 @@ export class MovieService {
 
         }
 
-    async findAll(page: number = 1, limit: number = 10): Promise<Movie[]> {
-        return this.prisma.movie.findMany({
-            skip: (page - 1) * limit,
-            take: limit,
-        });
-    }
+        async findAll(query?: string): Promise<Movie[]> {
+            let localMovies: Movie[] = [];
+            let apiMovies: Movie[] = [];
+            const allMovies: Movie[] = [];
+            const movieIds = new Set<string>();
+        
+            //Obtener películas de la base de datos local
+            localMovies = await this.prisma.movie.findMany({
+                where: {
+                    title: { contains: query, mode: 'insensitive' }
+                }
+            });
+        
+            //Obtener película de la API externa si hay una consulta
+            if (query && query.length > 2) {
+                // La API devuelve UN SOLO objeto de película, no un arreglo
+                const apiResult = await this.movieApi.searchMovie(query);
+                
+                //verificamos si la respuesta existe y tiene un título
+                if (apiResult && apiResult.Title) {
+                    //formateamos el ÚNICO objeto de la API
+                    const formattedMovie = {
+                        id: apiResult.imdbID,
+                        title: apiResult.Title,
+                        description: apiResult.Plot || null,
+                        releaseYear: parseInt(apiResult.Year),
+                        coverUrl: apiResult.Poster,
+                        genres: this.mapApiGenres(apiResult.Genre),
+                        duration: this.parseDuration(apiResult.Runtime),
+                        videoMetadata: {
+                            imdbID: apiResult.imdbID,
+                            rating: apiResult.imdbRating || 'N/A'
+                        },
+                        watchedBy: [], 
+                        watchlist: [], 
+                        addedAt: new Date()
+                    };
+                    apiMovies.push(formattedMovie);
+                }
+            }
+            
+            //fusionar ambas listas para evitar duplicados
+            for (const movie of localMovies) {
+                if (!movieIds.has(movie.id)) {
+                    movieIds.add(movie.id);
+                    allMovies.push(movie);
+                }
+            }
+        
+            for (const movie of apiMovies) {
+                if (!movieIds.has(movie.id)) {
+                    movieIds.add(movie.id);
+                    allMovies.push(movie);
+                }
+            }
+        
+            return allMovies;
+        }
+
+
+
+
 
     async findOne(id: string) {
         return this.prisma.movie.findUnique({ where: { id } });
@@ -75,12 +131,6 @@ export class MovieService {
     async remove(id: string) {
         return this.prisma.movie.delete({ where: { id } });
     }
-
-    /* 
-    async enrichMovieData(title: string) {
-        const omdbData = await this.omdbService.searchMoviesByTitle(title);
-    }
-    */
 
     async createWithExternalApi(title: string) {
             const apiData = await this.movieApi.searchMovie(title);
@@ -125,5 +175,56 @@ export class MovieService {
     async searchFromAPI(title: string) {
         return this.movieApi.searchMovie(title);
     }
+
+
+//watchlist para favoritos
+
+    async getWatchlist(userId: string): Promise<string[]> {
+        const userWithWatchlist = await this.prisma.user.findUnique({
+        where: { id: userId },
+        include: { 
+            watchlist: {
+            select: { id: true } // Solo los IDs
+            } 
+        },
+        });
+    
+        if (!userWithWatchlist?.watchlist) {
+        return [];
+        }
+    
+        // Extrae solo los IDs
+        return userWithWatchlist.watchlist.map(movie => movie.id);
+    }
+
+    async addMovieToWatchlist(userId: string, movieId: string) {
+        await this.prisma.user.update({
+            where: { id: userId },
+            data: {
+                watchlist: {
+                connect: { id: movieId },
+                },
+            },
+            });
+            
+            // Devuelve la watchlist ACTUALIZADA, no el usuario completo
+            return this.getWatchlist(userId);
+        }
+        
+
+    async removeMovieFromWatchlist(userId: string, movieId: string) {
+            await this.prisma.user.update({
+            where: { id: userId },
+            data: {
+                watchlist: {
+                disconnect: { id: movieId },
+                },
+            },
+            });
+            
+            // Devuelve la watchlist ACTUALIZADA, no el usuario completo
+            return this.getWatchlist(userId);
+    }
+
 
 }

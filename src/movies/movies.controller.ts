@@ -1,5 +1,5 @@
 
-import { Controller, Get, Post, Body, Param, Delete, Patch, UseGuards  } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Patch, UseGuards, Request } from '@nestjs/common';
 import { MovieService } from './movies.service';
 import { CreateMovieDto } from './DTO/create-movie.dto';
 import { BadRequestException, Query } from '@nestjs/common';
@@ -11,6 +11,8 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { UserRole } from '@prisma/client';
 import { Roles } from 'src/auth/decorators/roles.decorator';
+
+
 
 @Controller('movies')
 export class MovieController {
@@ -24,8 +26,9 @@ export class MovieController {
         }
 
     @Get()
-    findAll() {
-        return this.movieService.findAll();
+        async findAll(@Query('query') query?: string) {
+            // Ahora el controlador recibe la consulta y se la pasa al servicio
+            return this.movieService.findAll(query);
     }
 
     @Get(':id')
@@ -63,6 +66,38 @@ export class MovieController {
     async importFromOMDB(@Body() { title }: { title: string }) {
         return this.movieService.createWithExternalApi(title);
     }
+
+
+//WATCLIST PARA FAVORITOS 
+
+    @Get('watchlist')
+    @UseGuards(JwtAuthGuard)
+    async getWatchlist(@Request() req: any) {
+        const userId = req.user.id;
+        const watchlist = await this.movieService.getWatchlist(userId);
         
+        // DEBUG FINAL
+        console.log("✅ Controller devolviendo:", {
+            type: typeof watchlist,
+            isArray: Array.isArray(watchlist),
+            value: watchlist
+        });
+        
+        return watchlist;
+    }
+
+    @Post(':movieId/watchlist')
+    @UseGuards(JwtAuthGuard)
+    async addMovieToWatchlist(@Request() req: any, @Param('movieId') movieId: string) {
+        const userId = req.user.id;
+        return this.movieService.addMovieToWatchlist(userId, movieId);
+    }
+
+    @Delete(':movieId/watchlist')
+    @UseGuards(JwtAuthGuard) 
+    async removeMovieFromWatchlist(@Request() req: any, @Param('movieId') movieId: string) {
+        const userId = req.user.id;
+        return this.movieService.removeMovieFromWatchlist(userId, movieId);
+    }
 
 }
