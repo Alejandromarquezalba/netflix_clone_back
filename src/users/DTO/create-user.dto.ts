@@ -1,6 +1,7 @@
 import { IsString, IsEmail, MinLength, MaxLength, Matches, IsOptional, IsEnum } from 'class-validator';
 import { Transform } from 'class-transformer';
 import { UserRole } from '@prisma/client';
+import { IsAllowedEmailDomain } from './custom-email.decorator'; 
 
 export class CreateUserDto {
     @IsString()
@@ -9,6 +10,7 @@ export class CreateUserDto {
     name: string;
 
     @IsEmail({}, { message: 'Email inválido.' })
+    @IsAllowedEmailDomain({ message: 'Dominio de correo no permitido.' })
     @Transform(({ value }) => value.trim().toLowerCase())
     email: string;
 
