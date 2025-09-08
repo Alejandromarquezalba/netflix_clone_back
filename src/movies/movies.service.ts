@@ -49,7 +49,8 @@ export class MovieService {
         
             //Obtener película de la API externa si hay una consulta
             if (query && query.length > 2) {
-                // La API devuelve UN SOLO objeto de película, no un arreglo
+// La API devuelve UN SOLO objeto de película, no un arreglo
+//no hace falta axios o fetch porque ya 
                 const apiResult = await this.movieApi.searchMovie(query);
                 
                 //verificamos si la respuesta existe y tiene un título

@@ -19,7 +19,9 @@ export class MovieApiService {
         const baseUrl = this.config.getOrThrow<string>('OMDB_BASE_URL');
         const apiKey = this.config.getOrThrow<string>('OMDB_API_KEY');
     
-        //llamo api extern
+//CONEXION CON LA API
+//la llamada es aquí pero luego la uso en el SERVICE de movies, donde solo injecto este servicio. 
+                                                                                                //*Esto a la larga es mejor para el mantenimiento porque en vez de llamar a 100 axios y tener que cambiarlos a TOOODOS si la api cambia todos se rigen por este solito que está aquí.
         const { data } = await axios.get(baseUrl, {
             params: {
                 t: title,

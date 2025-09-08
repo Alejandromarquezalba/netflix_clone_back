@@ -19,15 +19,15 @@ export class MovieController {
     constructor(private readonly movieService: MovieService) {}
 
     @Post()
-        @UseGuards(JwtAuthGuard, RolesGuard) // Primero JWT Guard, luego Roles Guard
-        @Roles(UserRole.ADMIN) // Solo los usuarios con rol ADMIN pueden acceder a este endpoint
+        @UseGuards(JwtAuthGuard, RolesGuard) 
+        @Roles(UserRole.ADMIN) 
         async create(@Body() createMovieDto: CreateMovieDto) {
             return this.movieService.create(createMovieDto);
         }
 
     @Get()
         async findAll(@Query('query') query?: string) {
-            // Ahora el controlador recibe la consulta y se la pasa al servicio
+
             return this.movieService.findAll(query);
     }
 
