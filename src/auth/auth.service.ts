@@ -11,7 +11,7 @@ export class AuthService {
     constructor(
         private usersService: UserService,
         private jwtService: JwtService,
-        private prisma: PrismaService, // Asegúrate de que PrismaService esté importado y configurado correctamente
+        private prisma: PrismaService, 
     ) {}
 
     async register(createUserDto: CreateUserDto) {
@@ -22,7 +22,6 @@ export class AuthService {
         }
 
         //construir el objeto de datos del usuario, FORZANDO el rol a 'USER'
-
         const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
     
         const newUser = await this.prisma.user.create({
@@ -51,7 +50,66 @@ export class AuthService {
         
     }
 
+    async validateUser(email: string, password: string) {
+        const user = await this.usersService.findByEmail(email);
+        
+        if (!user) {
+            throw new UnauthorizedException('Credenciales inválidas');
+        }
+        
+            //comparación directa con cuenta demo
+            if (email === 'usuario@gmail.com' || email === 'demo@gmail.com') {
+            console.log('🔐 Validando cuenta demo...');
+            if (user.password === password) { 
+                console.log('✅ Cuenta demo validada');
+                const payload = { 
+                email: user.email, 
+                sub: user.id, 
+                role: user.role 
+                };
+                
+                return {
+                access_token: this.jwtService.sign(payload),
+                user: {          
+                    id: user.id,   
+                    name: user.name,
+                    email: user.email,
+                    role: user.role
+                }
+                };
+            } else {
+                throw new UnauthorizedException('Credenciales inválidas');
+            }
+            }
+            
+            //usuarios normales encriptacion
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+            if (!isPasswordValid) {
+            throw new UnauthorizedException('Credenciales inválidas');
+            }
+        
+            const payload = { 
+            email: user.email, 
+            sub: user.id, 
+            role: user.role 
+            };
+            
+            return {
+            access_token: this.jwtService.sign(payload),
+            user: {          
+                id: user.id,   
+                name: user.name,
+                email: user.email,
+                role: user.role
+            }
+            };
+        }
 
+
+
+
+
+/*
     async validateUser(email: string, password: string) {
         const user = await this.usersService.findByEmail(email);
         
@@ -80,7 +138,8 @@ export class AuthService {
             }
             };
         }
+        
+*/
 
-
-    
 }
+        
