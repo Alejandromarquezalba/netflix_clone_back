@@ -26,14 +26,6 @@ export class ProfileController {
         return this.profileService.create(createProfileDto, authenticatedUserId);
     }
 
-    /* viejo get que se usaba antes de querer mostrar los perfiles de usuarios en el front.
-    @Get() 
-    async getMyProfiles( 
-    @Req() req: Request & { user: { id: string; role: UserRole } }
-    ) {
-        return this.profileService.findByUserId(req.user.id);
-    }
-    */
 
     @Get()
     async getMyProfiles(
