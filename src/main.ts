@@ -12,8 +12,17 @@ async function bootstrap() {
 
   app.use(cookieParser());
 
+  /* anterior cors, con esto railway esta active
   app.enableCors({
     origin: configService.get<string>('FRONTEND_URL'), //conect con el front
+    credentials: true,
+  });
+  */
+  app.enableCors({
+    origin: [
+      'https://netflix-clone-topaz-iota.vercel.app',
+      'http://localhost:3001'
+    ],
     credentials: true,
   });
 
@@ -33,4 +42,4 @@ async function bootstrap() {
 
 }
 bootstrap();
- 
+
