@@ -18,12 +18,25 @@ async function bootstrap() {
     credentials: true,
   });
   */
+
+  /*
   app.enableCors({
     origin: [
       'https://netflix-clone-topaz-iota.vercel.app',
       'http://localhost:3001'
     ],
     credentials: true,
+  });
+  */
+
+  app.enableCors({
+  origin: [
+    'https://netflix-clone-topaz-iota.vercel.app',
+    'http://localhost:3001'
+  ],
+  credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization'], 
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'] 
   });
 
   app.useGlobalPipes(
