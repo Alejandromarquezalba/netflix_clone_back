@@ -2,19 +2,15 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-
 COPY package*.json ./
 COPY prisma ./prisma/
 
-# Instalar dependencias y generar Prisma
 RUN npm ci
 RUN npx prisma generate
 
-# Copiar código y construir
 COPY . .
-RUN npm run build
+RUN npm run build && ls -la dist/ && find dist/ -name "*.js" | head -10
 
 EXPOSE 3001
 
-CMD ["npm", "run", "start:prod"]
-
+CMD ["node", "dist/src/main"]
