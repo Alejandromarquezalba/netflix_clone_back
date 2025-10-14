@@ -58,7 +58,7 @@ export class AuthService {
         }
         
             //comparación directa con cuenta demo
-            if (email === 'usuario@gmail.com' || email === 'demo@gmail.com') {
+            if (email === 'NewDemo@gmail.com') {
 
             if (user.password === password) { 
 

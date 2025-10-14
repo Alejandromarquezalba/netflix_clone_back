@@ -64,7 +64,7 @@ export class AuthController {
     //solo para la cuenta demo
     @Post('demo-login')
     async demoLogin() {
-        const demoUser = await this.usersService.findByEmail('usuario@gmail.com');
+        const demoUser = await this.usersService.findByEmail('NewDemo@gmail.com');
 
         if (!demoUser) {
             throw new NotFoundException('Cuenta demo no configurada');
