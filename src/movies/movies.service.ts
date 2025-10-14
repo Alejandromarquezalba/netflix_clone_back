@@ -228,4 +228,26 @@ export class MovieService {
     }
 
 
+    async seedPopularMovies(): Promise<Movie[]> {
+        const popularTitles = [
+            'Matrix', 'Avengers', 'Inception', 'Titanic', 
+            'The Dark Knight', 'Pulp Fiction', 'Forrest Gump'
+            ];
+            
+            const results: Movie[] = [];
+            
+            for (const title of popularTitles) {
+            try {
+                const movie = await this.createWithExternalApi(title);
+                results.push(movie);
+            } catch (error) {
+                console.error(`Error seeding movie ${title}:`, error);
+                // Continúa con las siguientes películas
+            }
+            }
+            
+            return results;
+        }
+
+
 }

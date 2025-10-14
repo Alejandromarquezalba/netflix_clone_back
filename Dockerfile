@@ -1,3 +1,4 @@
+#con datos reales de gente real esto no se hace pero por ahora como esto es una demo lo ignoro. 
 FROM node:20-alpine
 
 WORKDIR /app

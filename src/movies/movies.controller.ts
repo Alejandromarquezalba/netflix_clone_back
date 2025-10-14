@@ -100,4 +100,15 @@ export class MovieController {
         return this.movieService.removeMovieFromWatchlist(userId, movieId);
     }
 
+
+
+    @Post('seed/popular')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(UserRole.ADMIN)
+        async seedPopularMovies() {
+        return this.movieService.seedPopularMovies();
+    }
 }
+
+
+
