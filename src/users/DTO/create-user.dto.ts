@@ -16,7 +16,7 @@ export class CreateUserDto {
 
     @IsString()
     @MinLength(8, { message: 'Mínimo 8 caracteres.' })
-    @Matches(/^(?!.*(admin|123456|password|qwerty|user|nombredeusuario))/i, {
+    @Matches(/^(?!.*(admin|password|qwerty|user|nombredeusuario))/i, {
         message: 'La contraseña es demasiado común o insegura',
     })
     @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/, {
