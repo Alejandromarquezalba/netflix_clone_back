@@ -229,20 +229,51 @@ export class MovieService {
 
 
     async seedPopularMovies(): Promise<Movie[]> {
-        const popularTitles = [
-            'Matrix', 'Avengers', 'Inception', 'Titanic', 
-            'The Dark Knight', 'Pulp Fiction', 'Forrest Gump'
+            //Primero verifica si ya hay películas
+            const existingMovies = await this.prisma.movie.count();
+            if (existingMovies > 0) {
+            throw new Error('Database already has movies. Delete them first if you want to re-seed.');
+            }
+        
+            const popularTitles = [
+            'Matrix', 'Avengers', 'Inception', 'Titanic',
+            'The Dark Knight', 'Pulp Fiction', 'Forrest Gump', 'Interstellar'
             ];
             
             const results: Movie[] = [];
             
             for (const title of popularTitles) {
             try {
-                const movie = await this.createWithExternalApi(title);
+                // Busca la película en OMDB
+                const response = await fetch(
+                `${process.env.OMDB_BASE_URL}?apikey=${process.env.OMDB_API_KEY}&t=${encodeURIComponent(title)}`
+                );
+                const data = await response.json();
+                
+                if (data.Response === 'False') {
+                console.error(`Movie not found: ${title}`);
+                continue;
+                }
+        
+                // Crea la película en tu base de datos
+                const movie = await this.prisma.movie.create({
+                data: {
+                    id: data.imdbID,
+                    title: data.Title,
+                    description: data.Plot,
+                    releaseYear: parseInt(data.Year),
+                    duration: data.Runtime ? parseInt(data.Runtime) : null,
+                    coverUrl: data.Poster !== 'N/A' ? data.Poster : null,
+                    addedAt: new Date(),
+                    genres: data.Genre ? data.Genre.split(', ') : [],
+                },
+                });
+                
                 results.push(movie);
+                console.log(`✅ Seeded: ${movie.title}`);
+                
             } catch (error) {
-                console.error(`Error seeding movie ${title}:`, error);
-                // Continúa con las siguientes películas
+                console.error(`❌ Error seeding movie ${title}:`, error);
             }
             }
             
