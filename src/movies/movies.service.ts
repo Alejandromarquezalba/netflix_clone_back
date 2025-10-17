@@ -134,7 +134,10 @@ export class MovieService {
     }
 
     async createWithExternalApi(title: string) {
-            const apiData = await this.movieApi.searchMovie(title);
+        console.log('Buscando en OMDB:', title);
+        const apiData = await this.movieApi.searchMovie(title);
+        console.log('Datos de OMDB recibidos:', apiData);
+            
             
             return this.prisma.movie.create({
             data: {
