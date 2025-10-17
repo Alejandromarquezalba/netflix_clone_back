@@ -9,6 +9,10 @@ const prisma = new PrismaClient();
 async function main() {
     const saltRounds = 10;
     const adminPlainPassword = process.env.ADMIN_SEED_PASSWORD; 
+
+    const popularTitles = ['Matrix', 'Avengers', 'Inception'];
+
+
     if (!adminPlainPassword) {
         throw new Error('ADMIN_SEED_PASSWORD no está definida en el archivo .env');
         }
@@ -118,35 +122,67 @@ async function main() {
             console.warn('Usuario admin no encontrado, no se pudieron crear perfiles.');
         }
         
+        /*
         await prisma.movie.createMany({
         data: [
-        {
-            title: 'El Viaje del Héroe',
-            description: 'Una épica aventura de un joven que descubre su destino.',
-            releaseYear: 2023,
-            genres: ['ACTION', 'DOCUMENTARY'], 
-            videoMetadata: { 
-            videoUrl: 'https://example.com/videos/heroe.mp4',
-            trailerUrl: 'https://example.com/trailers/heroe_trailer.mp4',
+            {
+                title: 'El Viaje del Héroe',
+                description: 'Una épica aventura de un joven que descubre su destino.',
+                releaseYear: 2023,
+                genres: ['ACTION', 'DOCUMENTARY'], 
+                videoMetadata: { 
+                videoUrl: 'https://example.com/videos/heroe.mp4',
+                trailerUrl: 'https://example.com/trailers/heroe_trailer.mp4',
+                },
+                coverUrl: 'https://example.com/covers/heroe.jpg',
+                duration: 150,
             },
-            coverUrl: 'https://example.com/covers/heroe.jpg',
-            duration: 150,
-        },
-        {
-            title: 'Comedia en la Ciudad',
-            description: 'Un grupo de amigos se mete en situaciones hilarantes en la gran ciudad.',
-            releaseYear: 2022,
-            genres: ['COMEDY'],
-            videoMetadata: {
-            videoUrl: 'https://example.com/videos/comedia.mp4',
-            trailerUrl: 'https://example.com/trailers/comedia_trailer.mp4',
+            {
+                title: 'Comedia en la Ciudad',
+                description: 'Un grupo de amigos se mete en situaciones hilarantes en la gran ciudad.',
+                releaseYear: 2022,
+                genres: ['COMEDY'],
+                videoMetadata: {
+                videoUrl: 'https://example.com/videos/comedia.mp4',
+                trailerUrl: 'https://example.com/trailers/comedia_trailer.mp4',
+                },
+                coverUrl: 'https://example.com/covers/comedia.jpg',
+                duration: 95,
             },
-            coverUrl: 'https://example.com/covers/comedia.jpg',
-            duration: 95,
-        },
         ],
-        skipDuplicates: true,
-    });
+
+            skipDuplicates: true,
+        });
+        */
+
+        for (const title of popularTitles) {
+            try {
+              // Usa el método que YA TIENES funcionando
+                const movie = await fetch(`http://www.omdbapi.com/?t=${title}&apikey=faf7e5bb`)
+                    .then(res => res.json());
+                
+                await prisma.movie.create({
+                    data: {
+                    title: movie.Title,
+                    description: movie.Plot,
+                    releaseYear: parseInt(movie.Year),
+                    genres: movie.Genre?.split(', ').map(g => g.trim()) || [],
+                    coverUrl: movie.Poster,
+                    duration: movie.Runtime ? parseInt(movie.Runtime) : 120,
+                    videoMetadata: {
+                        imdbId: movie.imdbID,
+                        rating: movie.imdbRating
+                    }
+                    }
+                });
+                console.log(`✅ "${title}" creada`);
+                } catch (error) {
+                console.log(`❌ Error con "${title}":`, error.message);
+                }
+            }
+
+
+
     console.log('Seed de películas completado.');
 }
 
