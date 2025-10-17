@@ -103,8 +103,8 @@ export class MovieController {
 
 
     @Post('seed/popular')
-    @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles(UserRole.ADMIN)
+    //@UseGuards(JwtAuthGuard, RolesGuard)
+    //@Roles(UserRole.ADMIN)
         async seedPopularMovies() {
         return this.movieService.seedPopularMovies();
     }
