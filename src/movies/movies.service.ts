@@ -173,6 +173,9 @@ export class MovieService {
         .filter((genre): genre is MovieGenre => !!genre) || [];
     }
     */
+
+
+    
     private mapApiGenres(genreString: string): string[] {
         return genreString?.split(', ').map(genre => genre.trim()) || [];
     }
