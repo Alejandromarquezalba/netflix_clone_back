@@ -1,6 +1,6 @@
 import { IsString, IsInt, IsUrl, IsArray, IsEnum, Min, Max, IsOptional, ValidateNested, MaxLength, MinLength} from 'class-validator';
 import { Type } from 'class-transformer';
-import { MovieGenre } from '@prisma/client';
+//import { MovieGenre } from '@prisma/client';
 
 //Generos
 
@@ -30,9 +30,15 @@ export class VideoMetadataDto {
     @Max(new Date().getFullYear() + 2)
     releaseYear: number;
 
+    /*
     @IsArray()
     @IsEnum(MovieGenre, { each: true, message: 'Cada genero debe ser valido.' })
     genres: MovieGenre[];
+    */
+
+    @IsArray()
+    @IsString({ each: true })
+    genres: string[];
 
     @ValidateNested()
     @Type(() => VideoMetadataDto) // <-- ¡Importante! Asegúrate de tener @Type aquí para anidar DTOs
