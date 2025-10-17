@@ -228,56 +228,80 @@ export class MovieService {
     }
 
 
-    async seedPopularMovies(): Promise<Movie[]> {
-            //Primero verifica si ya hay películas
+    async seedPopularMovies(): Promise<any> {
+        try {
+            console.log('🌱 Iniciando seed de películas...');
+            
+            // Verifica cuántas películas hay
             const existingMovies = await this.prisma.movie.count();
+            console.log(`📊 Películas existentes en DB: ${existingMovies}`);
+            
             if (existingMovies > 0) {
-            throw new Error('Database already has movies. Delete them first if you want to re-seed.');
+                return { 
+                message: '⚠️ La base de datos ya tiene películas', 
+                count: existingMovies,
+                suggestion: 'Elimina las películas existentes primero o usa otro endpoint'
+                };
             }
         
             const popularTitles = [
-            'Matrix', 'Avengers', 'Inception', 'Titanic',
-            'The Dark Knight', 'Pulp Fiction', 'Forrest Gump', 'Interstellar'
+                'Matrix', 'Avengers', 'Inception', 'Titanic',
+                'The Dark Knight', 'Pulp Fiction', 'Forrest Gump', 'Interstellar'
             ];
             
-            const results: Movie[] = [];
+            console.log(`🎬 Buscando ${popularTitles.length} películas...`);
+            const results: any[] = [];
             
             for (const title of popularTitles) {
-            try {
-                // Busca la película en OMDB
-                const response = await fetch(
-                `${process.env.OMDB_BASE_URL}?apikey=${process.env.OMDB_API_KEY}&t=${encodeURIComponent(title)}`
-                );
+                try {
+                console.log(`🔍 Buscando: ${title}`);
+                
+                const url = `${process.env.OMDB_BASE_URL}?apikey=${process.env.OMDB_API_KEY}&t=${encodeURIComponent(title)}`;
+                console.log(`📡 URL: ${url}`);
+                
+                const response = await fetch(url);
                 const data = await response.json();
                 
+                console.log(`📦 Respuesta para ${title}:`, data.Response);
+                
                 if (data.Response === 'False') {
-                console.error(`Movie not found: ${title}`);
-                continue;
+                    console.error(`❌ Película no encontrada: ${title} - ${data.Error}`);
+                    continue;
                 }
         
                 // Crea la película en tu base de datos
                 const movie = await this.prisma.movie.create({
-                data: {
+                    data: {
                     id: data.imdbID,
                     title: data.Title,
                     description: data.Plot,
                     releaseYear: parseInt(data.Year),
-                    duration: data.Runtime ? parseInt(data.Runtime) : null,
+                    duration: data.Runtime ? parseInt(data.Runtime.replace(' min', '')) : null,
                     coverUrl: data.Poster !== 'N/A' ? data.Poster : null,
                     addedAt: new Date(),
                     genres: data.Genre ? data.Genre.split(', ') : [],
-                },
+                    },
                 });
                 
                 results.push(movie);
-                console.log(`✅ Seeded: ${movie.title}`);
+                console.log(`✅ Guardada: ${movie.title}`);
                 
-            } catch (error) {
-                console.error(`❌ Error seeding movie ${title}:`, error);
-            }
+                } catch (error) {
+                console.error(`❌ Error con ${title}:`, error.message);
+                }
             }
             
-            return results;
+            console.log(`🎉 Seed completado: ${results.length} películas guardadas`);
+            return {
+                message: 'Seed completado',
+                count: results.length,
+                movies: results
+            };
+            
+            } catch (error) {
+            console.error('💥 Error general en seed:', error);
+            throw error;
+            }
         }
 
 
