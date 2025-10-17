@@ -5,7 +5,7 @@ import { CreateMovieDto } from './DTO/create-movie.dto';
 import { Movie } from '@prisma/client'; 
 import { NotFoundException } from '@nestjs/common';
 import { MovieApiService } from './api/movie-api.service';
-import { MovieGenre } from '@prisma/client';
+//import { MovieGenre } from '@prisma/client';
 
 //import { OmdbService } from 'src/ombd/ombd.service';
 
@@ -158,7 +158,9 @@ export class MovieService {
             const minutes = runtime.match(/\d+/);
             return minutes ? parseInt(minutes[0]) : null;
     }
-        
+    
+
+    /* viejo mapApiGenres:
     private mapApiGenres(genreString: string): MovieGenre[] {
         const genreMap: Record<string, MovieGenre> = {
         'Action': 'ACTION',
@@ -170,6 +172,12 @@ export class MovieService {
         .map(genre => genreMap[genre.trim()])
         .filter((genre): genre is MovieGenre => !!genre) || [];
     }
+    */
+    private mapApiGenres(genreString: string): string[] {
+        return genreString?.split(', ').map(genre => genre.trim()) || [];
+    }
+
+
 
 
     // Método para buscar en OMDB

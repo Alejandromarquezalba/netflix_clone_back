@@ -47,7 +47,7 @@ model Movie {
   releaseYear   Int
   coverUrl      String
   addedAt       DateTime     @default(now())
-  genres        MovieGenre[]
+  genres        String[]
   videoMetadata Json         @default("{}")
   watchedBy     Profile[]    @relation("WatchedMovies")
   watchlist     User[]       @relation("Watchlist")
@@ -113,11 +113,13 @@ enum AgeRatingEnum {
   MATURE
 }
 
+/*
 enum MovieGenre {
   ACTION
   COMEDY
   DOCUMENTARY
 }
+*/
 
 enum PlanType {
   BASIC
